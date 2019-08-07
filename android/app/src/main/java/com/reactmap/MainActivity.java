@@ -1,6 +1,8 @@
 package com.reactmap;
 
+
 import com.facebook.react.ReactActivity;
+import com.heanoria.library.reactnative.locationenabler.RNAndroidLocationEnablerException;
 
 public class MainActivity extends ReactActivity {
 
@@ -12,4 +14,6 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "ReactMap";
     }
+
+
 }

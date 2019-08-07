@@ -10,7 +10,6 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.heanoria.library.reactnative.locationenabler.RNAndroidLocationEnablerPackage;
 
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class MainApplication extends Application implements ReactApplication {
 
       @SuppressWarnings("UnnecessaryLocalVariable")
       List<ReactPackage> packages = new PackageList(this).getPackages();
-     // packages.add(new RNAndroidLocationEnablerPackage());
+      //packages.add(new RNAndroidLocationEnablerPackage());
       // Packages that cannot be autolinked yet can be added manually here, for example:
       // packages.add(new MyReactNativePackage());
       return packages;
@@ -50,4 +49,6 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
   }
+
+
 }

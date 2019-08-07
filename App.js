@@ -40,7 +40,7 @@ export default class App extends React.Component {
         predictions: []
     };
 
-    static async requestLocationPermission() {
+    async requestLocationPermission() {
         try {
             const granted = await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
@@ -49,8 +49,42 @@ export default class App extends React.Component {
                 }
             );
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                //To Check, If Permission is granted
-                //alert("You can use the Location");
+                if (GetLocation) {
+                    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+                        interval: 10000,
+                        fastInterval: 5000
+                    })
+                        .then(data => {
+                            this.setState({isLoading: true});
+                            GetLocation.getCurrentPosition({
+                                enableHighAccuracy: true,
+                                timeout: 15000,
+                            })
+                                .then(location => {
+                                    this.getSunriseInfo(location.latitude, location.longitude);
+                                    this.getAddressByLocation(location.latitude, location.longitude);
+                                })
+                                .catch(error => {
+                                    const {code, message} = error;
+                                    console.warn(code, message);
+                                });
+                            // The user has accepted to enable the location services
+                            // data can be :
+                            //  - "already-enabled" if the location services has been already enabled
+                            //  - "enabled" if user has clicked on OK button in the popup
+                        }).catch(err => {
+                        console.log(err)
+                        // The user has not accepted to enable the location services or something went wrong during the process
+                        // "err" : { "code" : "ERR00|ERR01|ERR02", "message" : "message"}
+                        // codes :
+                        //  - ERR00 : The user has clicked on Cancel button in the popup
+                        //  - ERR01 : If the Settings change are unavailable
+                        //  - ERR02 : If the popup has failed to open
+                    });
+                } else {
+                    console.log(navigator.geolocation);
+                    alert("Nav is not supported")
+                }
             } else {
                 alert("Location permission denied");
             }
@@ -76,44 +110,11 @@ export default class App extends React.Component {
     }
 
     getUserLocation = () => {
-        this.setState({isLoading: true});
         if (Platform.OS === 'android') {
-            App.requestLocationPermission();
+            this.requestLocationPermission();
         } else {
             alert('IOS device found');
         }
-        if (GetLocation) {
-            RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({interval: 10000, fastInterval: 5000})
-                .then(data => {
-                    GetLocation.getCurrentPosition({
-                        enableHighAccuracy: true,
-                        timeout: 15000,
-                    })
-                        .then(location => {
-                            this.getSunriseInfo(location.latitude, location.longitude);
-                            this.getAddressByLocation(location.latitude, location.longitude);
-                        })
-                        .catch(error => {
-                            const {code, message} = error;
-                            console.warn(code, message);
-                        })
-                    // The user has accepted to enable the location services
-                    // data can be :
-                    //  - "already-enabled" if the location services has been already enabled
-                    //  - "enabled" if user has clicked on OK button in the popup
-                }).catch(err => {
-                // The user has not accepted to enable the location services or something went wrong during the process
-                // "err" : { "code" : "ERR00|ERR01|ERR02", "message" : "message"}
-                // codes :
-                //  - ERR00 : The user has clicked on Cancel button in the popup
-                //  - ERR01 : If the Settings change are unavailable
-                //  - ERR02 : If the popup has failed to open
-            });
-        } else {
-            console.log(navigator.geolocation);
-            alert("Nav is not supported")
-        }
-
     };
 
     getPredictions(city) {
@@ -173,6 +174,7 @@ export default class App extends React.Component {
             <View style={styles.root}>
                 <TextInput style={styles.materialUnderlineTextbox} ref='input' placeholder='Enter the city...'
                            value={this.state.city}
+                           placeholderTextColor={"#FFFFFF"}
                            onChangeText={city => this.onChangeCity(city)}
                            onFocus={() => this.setState({city: ""})}/>
                 <View style={styles.predictions}>
